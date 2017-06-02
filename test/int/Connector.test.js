@@ -1,6 +1,9 @@
 "use strict";
 
 const assert = require("assert");
+const testdouble = require("testdouble");
+const FakeBigQuery = require("../FakeBigQuery");
+testdouble.replace("@google-cloud/bigquery", FakeBigQuery);
 
 const { SourceRecord } = require("kafka-connect");
 const { runSourceConnector, runSinkConnector, ConverterFactory } = require("./../../index.js");
