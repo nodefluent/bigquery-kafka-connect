@@ -7,6 +7,8 @@ class FakeDataset {
     constructor(name, projectId) {
         this.name = name;
         this.projectId = projectId;
+
+        this._exists = FakeDataset.nextValues.exists;
     }
 
     table(name) {
@@ -14,8 +16,16 @@ class FakeDataset {
     }
 
     exists(callback) {
-        return callback(null, true);
+        return callback(null, this._exists);
+    }
+
+    static setNextExists(exists) {
+        FakeDataset.nextValues.exists = exists;
     }
 }
+
+FakeDataset.nextValues = {
+    exists: true
+};
 
 module.exports = FakeDataset;

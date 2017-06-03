@@ -36,7 +36,8 @@ const config = {
         maxPollCount: 500,
         projectId: "bq-project-id",
         dataset: "bq_dataset",
-        table: "bq_table"
+        table: "bq_table",
+        idColumn: "id"
     }
 };
 
