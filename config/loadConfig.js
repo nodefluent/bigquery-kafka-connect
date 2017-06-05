@@ -3,11 +3,11 @@
 const path = require("path");
 const defaultConfig = require("./default.js");
 
-function isObject(item) {
+const isObject = item => {
     return (item && typeof item === "object" && !Array.isArray(item) && item !== null);
 }
 
-function mergeDeep(target, source) {
+const mergeDeep = (target, source) => {
     let output = Object.assign({}, target);
     if (isObject(target) && isObject(source)) {
         Object.keys(source).forEach(key => {
@@ -28,7 +28,7 @@ function mergeDeep(target, source) {
     return output;
 }
 
-function loadConfig(uri = null, configPath = "./../config/default.js") {
+const loadConfig = (uri = null, configPath = "./../config/default.js") => {
 
     if (uri) {
         if (path.isAbsolute(uri)) {

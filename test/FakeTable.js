@@ -12,8 +12,20 @@ class FakeTable {
         this._rows = JSON.parse(JSON.stringify(FakeTable.nextValues.rows));
     }
 
+    create(options, callback) {
+        this._exists = true;
+        FakeTable.lastCreateSchema = JSON.parse(JSON.stringify(options.schema));
+        FakeTable.createCalled = true;
+        return callback(null, {name: this.name, metadata: {schema: options.schema}}, {});
+    }
+
     exists(callback) {
         return callback(null, this._exists);
+    }
+
+    insert(rows, options, callback) {
+        FakeTable.lastInsertedRows.push(...rows);
+        return callback(null, {raw: options.raw, rowCount: FakeTable.lastInsertedRows.length});
     }
 
     get(callback) {
@@ -50,6 +62,18 @@ class FakeTable {
     static setNextRows(rows) {
         FakeTable.nextValues.rows = JSON.parse(JSON.stringify(rows));
     }
+
+    static resetLastInsertedRows() {
+        FakeTable.lastInsertedRows = [];
+    }
+
+    static resetLastCreateSchema() {
+        FakeTable.lastCreateSchema = {};
+    }
+
+    static resetCreateCalled() {
+        FakeTable.createCalled = false;
+    }
 }
 
 FakeTable.nextValues = {
@@ -57,5 +81,9 @@ FakeTable.nextValues = {
     schema: [],
     rows: []
 };
+
+FakeTable.lastInsertedRows = [];
+FakeTable.lastCreateSchema = {};
+FakeTable.createCalled = false;
 
 module.exports = FakeTable;
