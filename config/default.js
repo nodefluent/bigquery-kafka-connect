@@ -38,7 +38,12 @@ const config = {
         dataset: "bq_dataset",
         table: "bq_table",
         idColumn: "id"
-    }
+    },
+    http: {
+        port: 3149,
+        middlewares: []
+    },
+    enableMetrics: true
 };
 
 module.exports = config;
