@@ -7,6 +7,7 @@ const FakeDataset = require("../FakeDataset");
 const FakeTable = require("../FakeTable");
 testdouble.replace("@google-cloud/bigquery", FakeBigQuery);
 
+const { Producer } = require("sinek");
 const { SourceRecord } = require("kafka-connect");
 const { runSourceConnector, runSinkConnector, ConverterFactory } = require("./../../index.js");
 const sourceProperties = require("./../source-config.js");
@@ -20,25 +21,6 @@ describe("Connector INT", () => {
             { name: "name", type: "STRING", mode: "REQUIRED" },
             { name: "info", type: "STRING", mode: "NULLABLE" }
         ]
-    };
-
-    const jsonSchema = {
-        type: "object",
-        required: ["fields"],
-        properties: {
-            fields: {
-                type: "array",
-                items: {
-                    type: "object",
-                    required: ["name", "type", "mode"],
-                    properties: {
-                        name: {type: "string"},
-                        type: {type: "string"},
-                        mode: {type: ["string", "null"]}
-                    }
-                }
-            }
-        }
     };
 
     describe("Source connects and streams", () => {
@@ -198,6 +180,133 @@ describe("Connector INT", () => {
 
         it("should be able to see table data", () => {
             assert.equal(FakeTable.lastInsertedRows.length, 3);
+        });
+    });
+
+    describe("Converter Factory", function() {
+
+        let config = null;
+        let error = null;
+        let topic = "kc_bigquery_test_cf";
+        let converter = {};
+        let producer = null;
+
+        before("Setup the BigQueryFake", () => {
+            FakeDataset.setNextExists(true);
+            FakeTable.resetLastInsertedRows();
+            FakeTable.setNextExists(true);
+        });
+
+        it("should be able to create custom converter", function(done) {
+
+            const etlFunc = (messageValue, callback) => {
+
+                //type is an example json format field
+                if (messageValue.type === "publish") {
+                    return callback(null, {
+                        id: messageValue.payload.id,
+                        name: messageValue.payload.name,
+                        info: messageValue.payload.info
+                    });
+                }
+
+                if (messageValue.type === "unpublish") {
+                    return callback(null, null); //null value will cause deletion
+                }
+
+                console.log(messageValue);
+                throw new Error("unknown messageValue.type");
+            };
+
+            converter = ConverterFactory.createSinkSchemaConverter(bigQuerySchema, etlFunc);
+
+            const payload = {
+                id: 1,
+                name: "The first item",
+                info: "Give me a schema, please!"
+            };
+
+            const aFakeKafkaMessage = {
+                partition: 0,
+                topic: "test",
+                value: {
+                    payload,
+                    type: "publish"
+                },
+                offset: 1,
+                key: "1"
+            };
+
+            converter.toConnectData(Object.assign({}, aFakeKafkaMessage), (error, message) => {
+
+                assert.ifError(error);
+                assert.deepEqual(message.value.valueSchema, bigQuerySchema);
+                assert.deepEqual(message.value.value, payload);
+                assert.ok(message.key);
+                assert.ok(message.value.key);
+
+                converter.toConnectData(Object.assign({}, aFakeKafkaMessage), (error, message) => {
+
+                    assert.ifError(error);
+                    assert.deepEqual(message.value.valueSchema, bigQuerySchema);
+                    assert.deepEqual(message.value.value, payload);
+                    assert.ok(message.key);
+                    assert.ok(message.value.key);
+
+                    done();
+                });
+            });
+        });
+
+        it("should be able to produce a few messages", function() {
+            producer = new Producer(sinkProperties.kafka, topic, 1);
+            return producer.connect().then(_ => {
+                return Promise.all([
+                    producer.buffer(topic, "3", { payload: { id: 3, name: "test1", info: null }, type: "publish" }),
+                    producer.buffer(topic, "4", { payload: { id: 4, name: "test2", info: null }, type: "publish" }),
+                    producer.buffer(topic, "3", { payload: null, type: "unpublish" })
+                ]);
+            });
+        });
+
+        it("should be able to await a few broker interactions", function(done) {
+            setTimeout(() => {
+                assert.ifError(error);
+                done();
+            }, 1500);
+        });
+
+        it("shoud be able to sink message through custom converter", function() {
+            const onError = _error => {
+                error = _error;
+            };
+
+            const customProperties = Object.assign({}, sinkProperties, { topic });
+            return runSinkConnector(customProperties, [converter], onError).then(_config => {
+                config = _config;
+                return true;
+            });
+        });
+
+        it("should be able to await a few message puts", function(done) {
+            setTimeout(() => {
+                assert.ifError(error);
+                done();
+            }, 4500);
+        });
+
+        it("should be able to close configuration", function(done) {
+            config.stop();
+            producer.close();
+            setTimeout(done, 1500);
+        });
+
+        it("should be able to see table data", function() {
+            assert.equal(FakeTable.lastInsertedRows.length, 2);
+            assert.deepEqual(FakeTable.lastInsertedRows, [
+                {insertId: "3", json: {id: 3, name: "test1", info: null}},
+                {insertId: "4", json: {id: 4, name: "test2", info: null}}
+            ]);
         });
     });
 });
