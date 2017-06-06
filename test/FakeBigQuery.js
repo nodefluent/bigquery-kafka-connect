@@ -11,10 +11,6 @@ class FakeBigQuery {
     dataset(name) {
         return new FakeDataset(name, this.options.projectId);
     }
-
-    close() {
-        return;
-    }
 }
 
 module.exports = FakeBigQuery;
