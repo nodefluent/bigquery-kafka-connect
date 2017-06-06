@@ -26,6 +26,10 @@
     },
     "homepage": "https://github.com/nodefluent/bigquery-kafka-connect#readme",
     "preferGlobal": true,
+    "bin": {
+        "nkc-bigquery-source": "bin/nkc-bigquery-source.js",
+        "nkc-bigquery-sink": "bin/nkc-bigquery-sink.js"
+    },
     "dependencies": {
         "@google-cloud/bigquery": "^0.9.5",
         "async": "^2.4.1",
