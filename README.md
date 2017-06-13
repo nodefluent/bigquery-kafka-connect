@@ -34,12 +34,15 @@ runSinkConnector(config, [], onError).then(config => {
 ```es6
 const { runSinkConnector, ConverterFactory } = require("bigquery-kafka-connect");
 
-const bigQuerySchema = {
-    "fields": [
-        { name: "id", type: "INTEGER", mode: "REQUIRED" },
-        { name: "name", type: "STRING", mode: "REQUIRED" },
-        { name: "info", type: "STRING", mode: "NULLABLE" }
-    ]
+const bigQueryTableDescription = {
+    "schema": {
+        "fields": [
+            { name: "id", type: "INTEGER", mode: "REQUIRED" },
+            { name: "name", type: "STRING", mode: "REQUIRED" },
+            { name: "info", type: "STRING", mode: "NULLABLE" }
+        ]
+    },
+    "timePartitioning": {"type": "DAY"}
 };
 
 const etlFunc = (messageValue, callback) => {
@@ -60,7 +63,7 @@ const etlFunc = (messageValue, callback) => {
     callback(new Error("unknown messageValue.type"));
 };
 
-const converter = ConverterFactory.createSinkSchemaConverter(bigQuerySchema, etlFunc);
+const converter = ConverterFactory.createSinkSchemaConverter(bigQueryTableDescription, etlFunc);
 
 runSinkConnector(config, [converter], onError).then(config => {
     //runs forever until: config.stop();

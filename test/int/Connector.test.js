@@ -15,12 +15,15 @@ const sinkProperties = require("./../sink-config.js");
 
 describe("Connector INT", () => {
 
-    const bigQuerySchema = {
-        fields: [
-            { name: "id", type: "INTEGER", mode: "REQUIRED" },
-            { name: "name", type: "STRING", mode: "REQUIRED" },
-            { name: "info", type: "STRING", mode: "NULLABLE" }
-        ]
+    const bigQueryTableDescription = {
+        schema: {
+            fields: [
+                { name: "id", type: "INTEGER", mode: "REQUIRED" },
+                { name: "name", type: "STRING", mode: "REQUIRED" },
+                { name: "info", type: "STRING", mode: "NULLABLE" }
+            ]
+        },
+        timePartitioning: { type: "DAY" }
     };
 
     describe("Source connects and streams", () => {
@@ -49,7 +52,7 @@ describe("Connector INT", () => {
                 }
             ];
 
-            FakeTable.setNextSchema(bigQuerySchema);
+            FakeTable.setNextDescription(bigQueryTableDescription);
             FakeTable.setNextRows(rows);
         });
 
@@ -99,7 +102,7 @@ describe("Connector INT", () => {
 
             runSourceConnector(sourceProperties, [], onError)
                 .then(_ => {
-                    done("The source connector ran when it shouldn't.");
+                    done(new Error("The source connector ran when it shouldn't"));
                 })
                 .catch(_error => {
                     assert.equal(_error.message, "The specified dataset doesn't exist.");
@@ -122,7 +125,7 @@ describe("Connector INT", () => {
 
             runSourceConnector(sourceProperties, [], onError)
                 .then(_ => {
-                    done("The source connector ran when it shouldn't.");
+                    done(new Error("The source connector ran when it shouldn't"));
                 })
                 .catch(_error => {
                     assert.equal(_error.message, "The specified table doesn't exist.");
@@ -139,7 +142,7 @@ describe("Connector INT", () => {
             FakeTable.setNextExists(false);
             FakeTable.resetLastInsertedRows();
             FakeTable.resetCreateCalled();
-            FakeTable.resetLastCreateSchema();
+            FakeTable.resetLastCreateOptions();
         });
 
         let config = null;
@@ -175,7 +178,7 @@ describe("Connector INT", () => {
 
         it("should have created the table", () => {
             assert.ok(FakeTable.createCalled);
-            assert.deepEqual(FakeTable.lastCreateSchema, bigQuerySchema);
+            assert.deepEqual(FakeTable.lastCreateOptions, bigQueryTableDescription);
         });
 
         it("should be able to see table data", () => {
@@ -218,12 +221,12 @@ describe("Connector INT", () => {
                 throw new Error("unknown messageValue.type");
             };
 
-            converter = ConverterFactory.createSinkSchemaConverter(bigQuerySchema, etlFunc);
+            converter = ConverterFactory.createSinkSchemaConverter(bigQueryTableDescription, etlFunc);
 
             const payload = {
                 id: 1,
                 name: "The first item",
-                info: "Give me a schema, please!"
+                info: "Give me a description, please!"
             };
 
             const aFakeKafkaMessage = {
@@ -240,7 +243,7 @@ describe("Connector INT", () => {
             converter.toConnectData(Object.assign({}, aFakeKafkaMessage), (error, message) => {
 
                 assert.ifError(error);
-                assert.deepEqual(message.value.valueSchema, bigQuerySchema);
+                assert.deepEqual(message.value.valueSchema, bigQueryTableDescription);
                 assert.deepEqual(message.value.value, payload);
                 assert.ok(message.key);
                 assert.ok(message.value.key);
@@ -248,7 +251,7 @@ describe("Connector INT", () => {
                 converter.toConnectData(Object.assign({}, aFakeKafkaMessage), (error, message) => {
 
                     assert.ifError(error);
-                    assert.deepEqual(message.value.valueSchema, bigQuerySchema);
+                    assert.deepEqual(message.value.valueSchema, bigQueryTableDescription);
                     assert.deepEqual(message.value.value, payload);
                     assert.ok(message.key);
                     assert.ok(message.value.key);

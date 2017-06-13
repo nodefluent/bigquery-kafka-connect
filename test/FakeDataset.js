@@ -4,21 +4,21 @@ const FakeTable = require("./FakeTable");
 
 class FakeDataset {
 
-    constructor(name, projectId) {
-        this.name = name;
+    constructor(id, projectId) {
+        this.id = id;
         this.projectId = projectId;
 
         this._exists = FakeDataset.nextValues.exists;
     }
 
-    table(name) {
-        return new FakeTable(name, this.name, this.projectId);
+    table(id) {
+        return new FakeTable(id, this.id, this.projectId);
     }
 
     create(callback) {
         this._exists = true;
         FakeDataset.createCalled = true;
-        return callback(null, {name: this.name}, {});
+        return callback(null, {id: this.id}, {});
     }
 
     exists(callback) {

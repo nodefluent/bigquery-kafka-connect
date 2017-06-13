@@ -8,8 +8,8 @@ class FakeBigQuery {
         this.options = options;
     }
 
-    dataset(name) {
-        return new FakeDataset(name, this.options.projectId);
+    dataset(id) {
+        return new FakeDataset(id, this.options.projectId);
     }
 }
 

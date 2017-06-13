@@ -2,21 +2,32 @@
 
 class FakeTable {
 
-    constructor(name, datasetName, projectId) {
-        this.name = name;
-        this.datasetName = datasetName;
+    constructor(id, datasetId, projectId) {
+        this.id = id;
+        this.datasetId = datasetId;
         this.projectId = projectId;
 
         this._exists = FakeTable.nextValues.exists;
-        this._schema = JSON.parse(JSON.stringify(FakeTable.nextValues.schema));
+        this._description = JSON.parse(JSON.stringify(FakeTable.nextValues.description));
         this._rows = JSON.parse(JSON.stringify(FakeTable.nextValues.rows));
     }
 
     create(options, callback) {
         this._exists = true;
-        FakeTable.lastCreateSchema = JSON.parse(JSON.stringify(options.schema));
+        FakeTable.lastCreateOptions = JSON.parse(JSON.stringify(options));
         FakeTable.createCalled = true;
-        return callback(null, {name: this.name, metadata: {schema: options.schema}}, {});
+        return callback(
+            null,
+            {
+                tableReference: {
+                    projectId: this.projectId,
+                    datasetId: this.datasetId,
+                    tableId: this.id
+                },
+                schema: options.schema,
+                timePartitioning: options.timePartitioning
+            },
+            {});
     }
 
     exists(callback) {
@@ -29,11 +40,8 @@ class FakeTable {
     }
 
     get(callback) {
-        const tableData = {
-            metadata: {
-                schema: this._schema
-            }
-        };
+        const tableData = this._description;
+
         return callback(null, tableData);
     }
 
@@ -55,8 +63,8 @@ class FakeTable {
         FakeTable.nextValues.exists = exists;
     }
 
-    static setNextSchema(schema) {
-        FakeTable.nextValues.schema = JSON.parse(JSON.stringify(schema));
+    static setNextDescription(description) {
+        FakeTable.nextValues.description = JSON.parse(JSON.stringify(description));
     }
 
     static setNextRows(rows) {
@@ -67,8 +75,8 @@ class FakeTable {
         FakeTable.lastInsertedRows = [];
     }
 
-    static resetLastCreateSchema() {
-        FakeTable.lastCreateSchema = {};
+    static resetLastCreateOptions() {
+        FakeTable.lastCreateOptions = {};
     }
 
     static resetCreateCalled() {
@@ -78,12 +86,12 @@ class FakeTable {
 
 FakeTable.nextValues = {
     exists: true,
-    schema: [],
+    description: {},
     rows: []
 };
 
 FakeTable.lastInsertedRows = [];
-FakeTable.lastCreateSchema = {};
+FakeTable.lastCreateOptions = {};
 FakeTable.createCalled = false;
 
 module.exports = FakeTable;
