@@ -16,6 +16,33 @@ class FakeTable {
         this._exists = true;
         FakeTable.lastCreateOptions = JSON.parse(JSON.stringify(options));
         FakeTable.createCalled = true;
+
+        if (FakeTable.alreadyExistsResponseActive) {
+            const message = `Already Exists: Table ${this.projectId}:${this.datasetId}.${this.id}`;
+            const errors = [{
+                domain: 'global',
+                reason: 'duplicate',
+                message
+            }];
+            return callback(
+                {
+                    stack: "ApiError at some point in the code.",
+                    message,
+                    code: 409,
+                    name: "",
+                    errors
+                },
+                null,
+                {
+                    error: {
+                        errors,
+                        code: 409,
+                        message
+                    }
+                }
+            );
+        }
+
         return callback(
             null,
             {
@@ -82,6 +109,10 @@ class FakeTable {
     static resetCreateCalled() {
         FakeTable.createCalled = false;
     }
+
+    static setAlreadyExistsResponseActive(active) {
+        FakeTable.alreadyExistsResponseActive = active;
+    }
 }
 
 FakeTable.nextValues = {
@@ -93,5 +124,6 @@ FakeTable.nextValues = {
 FakeTable.lastInsertedRows = [];
 FakeTable.lastCreateOptions = {};
 FakeTable.createCalled = false;
+FakeTable.alreadyExistsResponseActive = false;
 
 module.exports = FakeTable;

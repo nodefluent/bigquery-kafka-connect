@@ -186,6 +186,67 @@ describe("Connector INT", () => {
         });
     });
 
+    describe("Sink swallows table exists errors, if multiple instances try to create it concurrently", () => {
+
+        before("Setup BigQuery fake", () => {
+            FakeDataset.setNextExists(true);
+            FakeTable.setNextExists(false);
+            FakeTable.resetLastInsertedRows();
+            FakeTable.resetCreateCalled();
+            FakeTable.resetLastCreateOptions();
+            FakeTable.setAlreadyExistsResponseActive(true);
+        });
+
+        let config = null;
+        let error = null;
+
+        it("should be able to produce a message", function() {
+            const producer = new Producer(sinkProperties.kafka, sinkProperties.topic, 1);
+            return producer.connect()
+                .then(() => producer.buffer(sinkProperties.topic, "3", { payload: { id: 9, name: "dummy", info: "for swallow test" }, type: "publish" }));
+        });
+
+        it("should be able to await message publication", done => {
+            setTimeout(() => {
+                assert.ifError(error);
+                done();
+            }, 1500);
+        });
+
+        it("should be able to run the BigQuery sink config", () => {
+            const converter = ConverterFactory.createSinkSchemaConverter(bigQueryTableDescription, (messageValue, callback) => callback(null, messageValue.payload));
+
+            const onError = _error => {
+                error = _error;
+            };
+            return runSinkConnector(sinkProperties, [converter], onError).then(_config => {
+                config = _config;
+                return true;
+            });
+        });
+
+        it("should be able to await sink connection", done => {
+            setTimeout(() => {
+                assert.ifError(error);
+                done();
+            }, 4500);
+        });
+
+        it("should be able to close configuration", done => {
+            config.stop();
+            setTimeout(done, 1500);
+        });
+
+        it("should have created the table", () => {
+            assert.ok(FakeTable.createCalled);
+            assert.deepEqual(FakeTable.lastCreateOptions, bigQueryTableDescription);
+        });
+
+        it("should have swallowed the error if the table already existed", () => {
+            assert.ifError(error);
+        });
+    });
+
     describe("Converter Factory", function() {
 
         let config = null;
@@ -198,6 +259,7 @@ describe("Connector INT", () => {
             FakeDataset.setNextExists(true);
             FakeTable.resetLastInsertedRows();
             FakeTable.setNextExists(true);
+            FakeTable.setAlreadyExistsResponseActive(false);
         });
 
         it("should be able to create custom converter", function(done) {
