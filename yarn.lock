@@ -979,15 +979,15 @@ jws@^3.0.0, jws@^3.1.4:
     jwa "^1.1.4"
     safe-buffer "^5.0.1"
 
-kafka-connect@^1.29.0:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/kafka-connect/-/kafka-connect-1.29.0.tgz#a38a3503b0e3ed9df4774305901b557f8203d723"
+kafka-connect@^1.32.0:
+  version "1.32.0"
+  resolved "https://registry.yarnpkg.com/kafka-connect/-/kafka-connect-1.32.0.tgz#a27f644dfcdb3789877d0b0c310062b315a7665c"
   dependencies:
     async "^2.4.1"
     bluebird "^3.5.0"
     body-parser "^1.17.2"
     express "^4.15.3"
-    prom-client "^9.0.0"
+    prom-client "^9.1.0"
     sinek "^4.4.0"
 
 kafka-node@~1.6.2:
@@ -1405,9 +1405,9 @@ process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
 
-prom-client@^9.0.0:
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/prom-client/-/prom-client-9.1.0.tgz#3ca710e0b448567063f54c2a82ea9dface1ee489"
+prom-client@^9.1.0:
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/prom-client/-/prom-client-9.1.1.tgz#9588f1681a0869616c7de916ad33ae8f1e03fc10"
   dependencies:
     tdigest "^0.1.1"
     util-extend "^1.0.1"
@@ -1781,9 +1781,9 @@ tdigest@^0.1.1:
   dependencies:
     bintrees "1.0.1"
 
-testdouble@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.0.0.tgz#fa11412ab5009ce9e3838a69419bcf8cba540e13"
+testdouble@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.1.1.tgz#d7000602dd7610e754d429cfcb635988c09200c6"
   dependencies:
     lodash "^4.15.0"
     quibble "^0.5.0"
@@ -1871,9 +1871,13 @@ utils-merge@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
 
-uuid@^3.0.0, uuid@^3.0.1, uuid@~3.0.1:
+uuid@^3.0.0, uuid@~3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
+
+uuid@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
 vary@~1.1.1:
   version "1.1.1"
