@@ -1,4 +1,6 @@
 # bigquery-kafka-connect
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/nodefluent/bigquery-kafka-connect.svg)](https://greenkeeper.io/)
 Kafka Connect connector for Google BigQuery
 
 [![Build Status](https://travis-ci.org/nodefluent/bigquery-kafka-connect.svg?branch=master)](https://travis-ci.org/nodefluent/bigquery-kafka-connect)
