@@ -5,7 +5,7 @@ const Logger = require("log4bro");
 
 const config = {
     kafka: {
-        zkConStr: "localhost:2181/",
+        kafkaHost: "localhost:9092",
         logger: new Logger(),
         groupId: "kc-bigquery-test",
         clientName: "kc-bigquery-test-name",
