@@ -1,6 +1,6 @@
 {
     "name": "bigquery-kafka-connect",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "kafka connect connector for Google BigQuery",
     "main": "index.js",
     "scripts": {
