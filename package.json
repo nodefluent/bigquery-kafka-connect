@@ -33,7 +33,7 @@
     "dependencies": {
         "@google-cloud/bigquery": "^0.9.6",
         "async": "^2.5.0",
-        "kafka-connect": "^2.2.0"
+        "kafka-connect": "^3.0.0"
     },
     "devDependencies": {
         "coveralls": "^2.13.1",
