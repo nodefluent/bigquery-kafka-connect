@@ -146,3 +146,42 @@ const config = {
     enableMetrics: true
 };
 ```
+
+## Native Client Config(uration)
+```es6
+const config = {
+    kafka: {
+        noptions: {
+            "metadata.broker.list": "localhost:9092",
+            "group.id": "kc-bigquery-test",
+            "enable.auto.commit": false,
+            "debug": "all",
+            "event_cb": true,
+            "client.id": "kc-bigquery-test-name"
+        },
+        tconf: {
+            "auto.offset.reset": "earliest",
+            "request.required.acks": 1
+        }
+    },
+    topic: "sc_test_topic",
+    partitions: 1,
+    maxTasks: 1,
+    pollInterval: 2000,
+    produceKeyed: true,
+    produceCompressionType: 0,
+    connector: {
+        batchSize: 500,
+        maxPollCount: 500,
+        projectId: "bq-project-id",
+        dataset: "bq_dataset",
+        table: "bq_table",
+        idColumn: "id"
+    },
+    http: {
+        port: 3149,
+        middlewares: []
+    },
+    enableMetrics: true
+};
+```
