@@ -37,6 +37,13 @@ const config = {
         dataset: "bq_dataset",
         table: "bq_table",
         idColumn: "id"
+    },
+    enableMetrics: false,
+    batch: {
+        batchSize: 100,
+        commitEveryNBatch: 1,
+        concurrency: 1,
+        commitSync: true
     }
 };
 

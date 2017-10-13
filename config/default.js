@@ -43,7 +43,13 @@ const config = {
         port: 3149,
         middlewares: []
     },
-    enableMetrics: true
+    enableMetrics: true,
+batch: {
+    batchSize: 100,
+    commitEveryNBatch: 1,
+    concurrency: 1,
+    commitSync: true
+}
 };
 
 module.exports = config;
