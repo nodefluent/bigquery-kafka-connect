@@ -39,7 +39,7 @@
         "coveralls": "^3.0.0",
         "istanbul": "^0.4.5",
         "log4bro": "^3.3.1",
-        "mocha": "^4.0.0",
+        "mocha": "^5.0.0",
         "mocha-lcov-reporter": "^1.3.0",
         "sinek": "^6.14.0",
         "testdouble": "^3.2.6",
