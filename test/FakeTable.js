@@ -62,6 +62,11 @@ class FakeTable {
     }
 
     insert(rows, options, callback) {
+        if (FakeTable.nextError) {
+            const error = FakeTable.nextError;
+            FakeTable.nextError = undefined;
+            return callback(error);
+        }
         FakeTable.lastInsertedRows.push(...rows);
         return callback(null, {raw: options.raw, rowCount: FakeTable.lastInsertedRows.length});
     }
@@ -80,7 +85,7 @@ class FakeTable {
         const resultRows = JSON.parse(JSON.stringify(this._rows));
 
         const resultPageStart = options.pageToken || 0;
-        const resultPageEnd = Math.min(resultPageStart + (options.maxResults || this._rows.length), this._rows.length);
+        const resultPageEnd = Math.min(resultPageStart + (options.maxResults || this._rows.length), this._rows.length);
 
         const rows = resultRows.slice(resultPageStart, resultPageEnd);
         return callback(null, rows, {pageToken: resultPageEnd}, {});
@@ -96,6 +101,10 @@ class FakeTable {
 
     static setNextRows(rows) {
         FakeTable.nextValues.rows = JSON.parse(JSON.stringify(rows));
+    }
+
+    static setErrorOnNextInsert() {
+        FakeTable.nextError = {message: "This is an error"};
     }
 
     static resetLastInsertedRows() {

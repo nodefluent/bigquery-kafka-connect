@@ -7,9 +7,11 @@ const FakeDataset = require("../FakeDataset");
 const FakeTable = require("../FakeTable");
 testdouble.replace("@google-cloud/bigquery", FakeBigQuery);
 
-const { Producer } = require("sinek");
-const { SourceRecord } = require("kafka-connect");
-const { runSourceConnector, runSinkConnector, ConverterFactory } = require("./../../index.js");
+const uuid = require("uuid");
+const {Producer} = require("sinek");
+const {SourceRecord} = require("kafka-connect");
+const {runSourceConnector, runSinkConnector, ConverterFactory} = require("./../../index.js");
+
 const sourceProperties = require("./../source-config.js");
 const sinkProperties = require("./../sink-config.js");
 
@@ -18,12 +20,12 @@ describe("Connector INT", () => {
     const bigQueryTableDescription = {
         schema: {
             fields: [
-                { name: "id", type: "INTEGER", mode: "REQUIRED" },
-                { name: "name", type: "STRING", mode: "REQUIRED" },
-                { name: "info", type: "STRING", mode: "NULLABLE" }
+                {name: "id", type: "INTEGER", mode: "REQUIRED"},
+                {name: "name", type: "STRING", mode: "REQUIRED"},
+                {name: "info", type: "STRING", mode: "NULLABLE"}
             ]
         },
-        timePartitioning: { type: "DAY" }
+        timePartitioning: {type: "DAY"}
     };
 
     describe("Source connects and streams", () => {
@@ -181,8 +183,67 @@ describe("Connector INT", () => {
             assert.deepEqual(FakeTable.lastCreateOptions, bigQueryTableDescription);
         });
 
-        it("should be able to see table data", () => {
+        it("should be able to see the inserted rows", () => {
             assert.equal(FakeTable.lastInsertedRows.length, 3);
+        });
+    });
+
+    describe("Sink connects, inserts, retries on error", () => {
+
+        let config = null;
+        let error = null;
+        let topic = "kc_bigquery_test_retry" + uuid.v4();
+        let producer = null;
+
+        before("Setup BigQuery fake", () => {
+            FakeDataset.resetCreateCalled();
+            FakeTable.resetLastInsertedRows();
+            FakeTable.setErrorOnNextInsert()
+        });
+
+        before("Produce 4 messages", () => {
+            producer = new Producer(sinkProperties.kafka, topic, 1);
+            return producer.connect().then(_ => {
+                return Promise.all([
+                    producer.buffer(topic, "10", {payload: {id: 10, name: "test10", info: null}, type: "publish"}),
+                    producer.buffer(topic, "11", {payload: {id: 11, name: "test11", info: null}, type: "publish"}),
+                    producer.buffer(topic, "12", {payload: {id: 12, name: "test12", info: null}, type: "publish"}),
+                    producer.buffer(topic, "13", {payload: {id: 13, name: "test13", info: null}, type: "publish"})
+                ]);
+            });
+        });
+
+        it("should be able to run the BigQuery sink config", () => {
+            const sinkPropertiesRetry = sinkProperties;
+            sinkPropertiesRetry.topic = topic;
+            sinkPropertiesRetry.connector.batchSize = 2;
+            const etlFunc = (messageValue, callback) => {
+                return callback(null, messageValue.payload);
+            };
+            let converter = ConverterFactory.createSinkSchemaConverter({}, etlFunc);
+
+            return runSinkConnector(sinkPropertiesRetry, [converter]).then(_config => {
+                config = _config;
+                config.on("model-upsert", id => console.log("upsert: " + id));
+                config.on("model-delete", id => console.log("delete: " + id));
+                return true;
+            });
+        });
+
+        it("should be able to await a few message puts", done => {
+            setTimeout(() => {
+                assert.ifError(error);
+                done();
+            }, 4500);
+        });
+
+        it("should be able to close configuration", done => {
+            config.stop();
+            setTimeout(done, 1500);
+        });
+
+        it("should be able to see the inserted rows", () => {
+            assert.equal(FakeTable.lastInsertedRows.length, 4);
         });
     });
 
@@ -200,10 +261,10 @@ describe("Connector INT", () => {
         let config = null;
         let error = null;
 
-        it("should be able to produce a message", function() {
+        it("should be able to produce a message", () => {
             const producer = new Producer(sinkProperties.kafka, sinkProperties.topic, 1);
             return producer.connect()
-                .then(() => producer.buffer(sinkProperties.topic, "3", { payload: { id: 9, name: "dummy", info: "for swallow test" }, type: "publish" }));
+                .then(() => producer.buffer(sinkProperties.topic, "3", {payload: {id: 9, name: "dummy", info: "for swallow test"}, type: "publish"}));
         });
 
         it("should be able to await message publication", done => {
@@ -247,7 +308,7 @@ describe("Connector INT", () => {
         });
     });
 
-    describe("Converter Factory", function() {
+    describe("Converter Factory", () => {
 
         let config = null;
         let error = null;
@@ -262,7 +323,7 @@ describe("Connector INT", () => {
             FakeTable.setAlreadyExistsResponseActive(false);
         });
 
-        it("should be able to create custom converter", function(done) {
+        it("should be able to create a custom converter", done => {
 
             const etlFunc = (messageValue, callback) => {
 
@@ -323,50 +384,50 @@ describe("Connector INT", () => {
             });
         });
 
-        it("should be able to produce a few messages", function() {
+        it("should be able to produce a few messages", () => {
             producer = new Producer(sinkProperties.kafka, topic, 1);
             return producer.connect().then(_ => {
                 return Promise.all([
-                    producer.buffer(topic, "3", { payload: { id: 3, name: "test1", info: null }, type: "publish" }),
-                    producer.buffer(topic, "4", { payload: { id: 4, name: "test2", info: null }, type: "publish" }),
-                    producer.buffer(topic, "3", { payload: null, type: "unpublish" })
+                    producer.buffer(topic, "3", {payload: {id: 3, name: "test1", info: null}, type: "publish"}),
+                    producer.buffer(topic, "4", {payload: {id: 4, name: "test2", info: null}, type: "publish"}),
+                    producer.buffer(topic, "3", {payload: null, type: "unpublish"})
                 ]);
             });
         });
 
-        it("should be able to await a few broker interactions", function(done) {
+        it("should be able to await a few broker interactions", done => {
             setTimeout(() => {
                 assert.ifError(error);
                 done();
             }, 1500);
         });
 
-        it("shoud be able to sink message through custom converter", function() {
+        it("shoud be able to sink message through custom converter", () => {
             const onError = _error => {
                 error = _error;
             };
 
-            const customProperties = Object.assign({}, sinkProperties, { topic });
+            const customProperties = Object.assign({}, sinkProperties, {topic});
             return runSinkConnector(customProperties, [converter], onError).then(_config => {
                 config = _config;
                 return true;
             });
         });
 
-        it("should be able to await a few message puts", function(done) {
+        it("should be able to await a few message puts", done => {
             setTimeout(() => {
                 assert.ifError(error);
                 done();
             }, 4500);
         });
 
-        it("should be able to close configuration", function(done) {
+        it("should be able to close configuration", done => {
             config.stop();
             producer.close();
             setTimeout(done, 1500);
         });
 
-        it("should be able to see table data", function() {
+        it("should be able to see the inserted rows", () => {
             assert.equal(FakeTable.lastInsertedRows.length, 2);
             assert.deepEqual(FakeTable.lastInsertedRows, [
                 {insertId: "3", json: {id: 3, name: "test1", info: null}},
