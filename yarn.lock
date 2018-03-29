@@ -3628,7 +3628,21 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
 
-sinek@^6.15.1, sinek@~6.15.1:
+sinek@^6.15.2:
+  version "6.15.2"
+  resolved "https://registry.yarnpkg.com/sinek/-/sinek-6.15.2.tgz#7309f4ac6fe4fac3f43d6f4c3155722aadaf089a"
+  dependencies:
+    async "~2.6.0"
+    bluebird "~3.5.1"
+    debug "~3.1.0"
+    kafka-node "~2.4.1"
+    murmur2-partitioner "~1.0.0"
+    murmurhash "~0.0.2"
+    uuid "~3.2.1"
+  optionalDependencies:
+    node-rdkafka "~2.2.3"
+
+sinek@~6.15.1:
   version "6.15.1"
   resolved "https://registry.yarnpkg.com/sinek/-/sinek-6.15.1.tgz#e28c2042be17bfccd89a3c3e0d434418d6f09ef0"
   dependencies:

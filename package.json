@@ -42,7 +42,7 @@
         "log4bro": "^3.5.0",
         "mocha": "^5.0.5",
         "mocha-lcov-reporter": "^1.3.0",
-        "sinek": "^6.15.1",
+        "sinek": "^6.15.2",
         "testdouble": "^3.6.0",
         "uuid": "^3.2.1"
     }
