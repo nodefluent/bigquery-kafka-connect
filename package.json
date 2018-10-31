@@ -31,7 +31,7 @@
         "nkc-bigquery-sink": "bin/nkc-bigquery-sink.js"
     },
     "dependencies": {
-        "@google-cloud/bigquery": "^1.3.0",
+        "@google-cloud/bigquery": "^2.0.0",
         "async": "^2.6.1",
         "kafka-connect": "^3.5.1",
         "npm": "^6.4.1"
