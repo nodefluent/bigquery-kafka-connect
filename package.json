@@ -37,7 +37,7 @@
         "npm": "^6.11.3"
     },
     "devDependencies": {
-        "coveralls": "^3.0.6",
+        "coveralls": "^3.0.7",
         "istanbul": "^0.4.5",
         "log4bro": "^3.11.0",
         "mocha": "^6.2.0",
